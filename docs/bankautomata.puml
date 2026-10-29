@@ -1,0 +1,96 @@
+@startuml
+' Bankautomata (b-07) - class diagram, the exception hierarchy in its own package
+
+package model {
+  class Szamla {
+    - tulajdonos : String {final}
+    - egyenleg : int
+    + befizet(osszeg : int)
+    + kivesz(osszeg : int) {throws NincsFedezetKivetel}
+    + getEgyenleg() : int
+  }
+
+  class Kartya {
+    + {static} MAX_HIBAS_PIN : int = 3
+    - kartyaszam : String {final}
+    - pin : String {final}
+    - hibasProbalkozasok : int
+    - letiltva : boolean
+    - maFelvett : int
+    + ellenorizPin(pin : String) {throws HibasPin, KartyaLetiltva}
+    + getMaFelvett() : int
+    ~ hozzaadMaiFelvetel(osszeg : int)
+  }
+
+  class Penztar {
+    + {static} CIMLETEK : int[] = {200, 100, 50, 10}
+    - keszlet : TreeMap<Integer, Integer>
+    + feltolt(cimlet : int, darab : int)
+    + kiszamol(osszeg : int) : Map<Integer, Integer> {throws NincsElegKeszpenz}
+    + kivesz(bankjegyek : Map<Integer, Integer>)
+    + osszesKeszpenz() : int
+  }
+
+  class Naplo {
+    - fajlnev : String
+    + naploz(esemeny : String)
+  }
+
+  class Bankautomata {
+    - napiLimit : int
+    + kartyaBehelyez(k : Kartya, pin : String)
+    + egyenleg() : int
+    + penzFelvetel(osszeg : int) : Map<Integer, Integer>
+    + befizetes(osszeg : int)
+    + kartyaKiad()
+  }
+
+  Kartya --> "1" Szamla
+  Bankautomata *-- "1" Penztar
+  Bankautomata --> "1" Naplo
+  Bankautomata --> "0..1" Kartya : aktivKartya
+}
+
+package kivetel <<checked>> {
+  class Exception
+  class AtmKivetel
+  class HibasPinKivetel {
+    - maradekProbalkozas : int
+  }
+  class KartyaLetiltvaKivetel {
+    - kartyaszam : String
+  }
+  class NincsFedezetKivetel {
+    - hianyzoOsszeg : int
+  }
+  class NincsElegKeszpenzKivetel {
+    - kertOsszeg : int
+  }
+  class NapiLimitKivetel {
+    - napiLimit : int
+    - maMegFelveheto : int
+  }
+
+  Exception <|-- AtmKivetel
+  AtmKivetel <|-- HibasPinKivetel
+  AtmKivetel <|-- KartyaLetiltvaKivetel
+  AtmKivetel <|-- NincsFedezetKivetel
+  AtmKivetel <|-- NincsElegKeszpenzKivetel
+  AtmKivetel <|-- NapiLimitKivetel
+}
+
+package "java.lang (unchecked)" {
+  class RuntimeException
+  class IllegalArgumentException
+  class IllegalStateException
+  RuntimeException <|-- IllegalArgumentException
+  RuntimeException <|-- IllegalStateException
+}
+
+Szamla ..> NincsFedezetKivetel : throws
+Kartya ..> HibasPinKivetel : throws
+Kartya ..> KartyaLetiltvaKivetel : throws
+Penztar ..> NincsElegKeszpenzKivetel : throws
+Bankautomata ..> NapiLimitKivetel : throws
+Szamla ..> IllegalArgumentException : amount <= 0
+@enduml
