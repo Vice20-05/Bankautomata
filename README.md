@@ -87,3 +87,7 @@ programmer error, so it's an `IllegalStateException`.
 into https://www.plantuml.com/plantuml. The `kivetel` package holds the checked
 hierarchy, the unchecked `java.lang` ones are drawn next to it, and the dashed
 arrows show which class throws what.
+
+## Note
+
+Claude only checked if the folders have README and gitignore and pushed them so all of them are pushed
